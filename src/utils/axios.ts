@@ -27,12 +27,14 @@ service.interceptors.response.use(
         // console.log('response::', response);
 
         if (code !== 0) {
+            ElMessage.error(res.msg);
             return Promise.reject(new Error(res.msg));
         }
         // do something
         return res;
     },
     (error: any) => {
+        ElMessage.error(error || error?.msg);
         // do something
         return Promise.reject(error);
     },

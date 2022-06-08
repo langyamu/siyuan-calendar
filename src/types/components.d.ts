@@ -5,24 +5,25 @@ import '@vue/runtime-core'
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    AIcon: typeof import('../components/eIcon.vue')['default'];
     Calendar: typeof import('./../components/Calendar/index.vue')['default']
     DateCell: typeof import('./../components/Calendar/DateCell.vue')['default']
-    EIcon: typeof import('./../components/EIcon.vue')['default']
     ElCalendar: typeof import('element-plus/es')['ElCalendar']
     ElConfigProvider: typeof import('element-plus/es')['ElConfigProvider']
     ElContainer: typeof import('element-plus/es')['ElContainer']
+    ElForm: typeof import('element-plus/es')['ElForm']
+    ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElMain: typeof import('element-plus/es')['ElMain']
+    ElOption: typeof import('element-plus/es')['ElOption']
+    ElSelect: typeof import('element-plus/es')['ElSelect']
     ElTabPane: typeof import('element-plus/es')['ElTabPane']
     ElTabs: typeof import('element-plus/es')['ElTabs']
     EventList: typeof import('./../components/Calendar/EventList.vue')['default']
     IEpCalendar: typeof import('~icons/ep/calendar')['default']
-    IEpCircleCheckFilled: typeof import('~icons/ep/circle-check-filled')['default']
     IEpSetting: typeof import('~icons/ep/setting')['default']
-    Month: typeof import('./../components/Month/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Setting: typeof import('./../components/Setting/index.vue')['default']
   }
 }
 

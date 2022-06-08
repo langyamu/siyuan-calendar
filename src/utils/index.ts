@@ -2,7 +2,7 @@ import to from 'await-to-js';
 import { AxiosRequestConfig } from 'axios';
 import service from './axios';
 export * from './axios';
-export { isDev, request, toLine };
+export { isDev, request, toLine, toReject, toResolve };
 export type { IResponseType };
 
 interface IResponseType<P = object | Array<object> | null> {
@@ -21,3 +21,10 @@ function request<T, U = Error>(
 }
 
 const toLine = (name: string) => name.replace(/([A-Z])/g, '-$1').toLowerCase();
+
+function toReject<U>(error: U): Promise<[U, undefined]> {
+    return Promise.reject([error, undefined]);
+}
+function toResolve<T>(res: T): Promise<[null, T]> {
+    return Promise.resolve([null, res]);
+}
