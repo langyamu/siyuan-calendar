@@ -1,0 +1,40 @@
+{
+    "compilerOptions": {
+        "typeRoots": [
+            "node_modules/@types", // 默认值
+            "src/types"
+        ],
+        "types": [
+            "@vueuse/core",
+            "node",
+            "vite/client",
+            "element-plus/global",
+            "unplugin-icons/types/vue"
+        ],
+        "target": "esnext",
+        "useDefineForClassFields": true,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "strict": true,
+        "jsx": "preserve",
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true, // for:: https://github.com/element-plus/element-plus/issues/7813#issuecomment-1136355052
+        "lib": ["esnext", "dom"],
+        "baseUrl": "./",
+        "paths": {
+            "@": ["src"],
+            "@/*": ["src/*"]
+        }
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.d.ts",
+        "src/**/*.tsx",
+        "src/**/*.vue",
+        "src/types/env.d.ts",
+        "*.d.ts"
+    ],
+    "exclude": ["node_modules"]
+}
