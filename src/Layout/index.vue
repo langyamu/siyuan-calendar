@@ -1,36 +1,43 @@
 <!-- Layout.vue -->
 <script setup lang="ts">
-import Calendar from '@/views/Calendar/index.vue';
-import Setting from '@/views/Setting/index.vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const routes = router.getRoutes().filter((route) => route.meta?.title);
+const isCollapse = ref(false);
 </script>
 
 <template>
-    <el-container direction="vertical">
-        <el-tabs tab-position="left">
-            <el-tab-pane>
-                <template #label>
-                    <span class="layout-tabs-pane-label"
-                        ><el-icon> <i-ep-calendar /></el-icon> 日历</span
-                    >
-                </template>
-
-                <Calendar />
-            </el-tab-pane>
-
-            <el-tab-pane>
-                <template #label>
-                    <span class="layout-tabs-pane-label"
-                        ><el-icon> <i-ep-setting /></el-icon> 设置</span
-                    >
-                </template>
-                <Setting />
-            </el-tab-pane>
-        </el-tabs>
+    <el-container direction="horizontal">
+        <el-aside width="auto">
+            <div style="text-align: center">
+                <el-switch v-model="isCollapse" />
+            </div>
+            <el-menu default-active="/calendar" router :collapse="!isCollapse">
+                <el-menu-item
+                    v-for="route in routes"
+                    :key="route.name"
+                    :index="route.path"
+                >
+                    <el-icon>
+                        <component :is="route.meta.icon"></component>
+                    </el-icon>
+                    <template #title>{{ route.meta.title }}</template>
+                </el-menu-item>
+            </el-menu>
+        </el-aside>
+        <el-container>
+            <el-main>
+                <router-view v-slot="{ Component, route }">
+                    <transition name="fade-slide" mode="out-in" appear>
+                        <keep-alive>
+                            <component :is="Component" :key="route.fullPath" />
+                        </keep-alive>
+                    </transition>
+                </router-view>
+            </el-main>
+        </el-container>
     </el-container>
 </template>
 
-<style scoped>
-.layout-tabs-pane-label .el-icon {
-    top: 1.5px;
-}
-</style>
+<style scoped></style>
