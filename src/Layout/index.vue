@@ -1,8 +1,9 @@
 <!-- Layout.vue -->
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const router = useRouter();
+const route = useRoute(); // 当前 路由
 const routes = router.getRoutes().filter((route) => route.meta?.title);
 const isCollapse = ref(false);
 </script>
@@ -13,7 +14,11 @@ const isCollapse = ref(false);
             <div style="text-align: center">
                 <el-switch v-model="isCollapse" />
             </div>
-            <el-menu default-active="/calendar" router :collapse="!isCollapse">
+            <el-menu
+                :default-active="route.path"
+                router
+                :collapse="!isCollapse"
+            >
                 <el-menu-item
                     v-for="route in routes"
                     :key="route.name"
