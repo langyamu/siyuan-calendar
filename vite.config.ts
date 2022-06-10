@@ -6,6 +6,7 @@ import Icons from 'unplugin-icons/vite';
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
+import { SITE_BASE_PATH } from './src/constants';
 
 export default defineConfig(({ command, mode }) => {
     const isDev = mode === 'development';
@@ -47,7 +48,7 @@ export default defineConfig(({ command, mode }) => {
                 autoInstall: true,
             }),
         ],
-        base: isDev ? '' : '/widgets/siyuan-calendar',
+        base: SITE_BASE_PATH,
         resolve: {
             alias: {
                 '@': path.resolve(__dirname, 'src'),
@@ -70,6 +71,7 @@ export default defineConfig(({ command, mode }) => {
         },
         build: {
             outDir: 'E:/_SiYuan_Workspace/data/widgets/siyuan-calendar',
+            sourcemap: true,
             // assetsDir: 'static',
         },
     };

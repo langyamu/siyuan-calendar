@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 const router = useRouter();
 const route = useRoute(); // 当前 路由
 const routes = router.getRoutes().filter((route) => route.meta?.title);
+console.log('routes::', routes);
 const isCollapse = ref(false);
 </script>
 
