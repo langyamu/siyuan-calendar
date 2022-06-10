@@ -7,6 +7,8 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Calendar: typeof import('./../components/Calendar/index.vue')['default']
     DateCell: typeof import('./../components/Calendar/DateCell.vue')['default']
+    DateCellList: typeof import('./../components/Calendar/DateCellList.vue')['default']
+    Drawer: typeof import('./../components/Calendar/Drawer/index.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElButtonGroup: typeof import('element-plus/es')['ElButtonGroup']
@@ -29,6 +31,7 @@ declare module '@vue/runtime-core' {
     ElSwitch: typeof import('element-plus/es')['ElSwitch']
     EventList: typeof import('./../components/Calendar/EventList.vue')['default']
     IEpLink: typeof import('~icons/ep/link')['default']
+    Loading: typeof import('element-plus/es')['ElLoadingDirective']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Setting: typeof import('./../components/Setting/index.vue')['default']

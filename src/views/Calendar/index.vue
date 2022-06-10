@@ -5,7 +5,7 @@ import Calendar from '@/components/Calendar/index.vue';
 <template>
     <el-container direction="vertical">
         <el-main>
-            <Calendar></Calendar>
+            <Calendar />
         </el-main>
     </el-container>
 </template>

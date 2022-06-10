@@ -1,18 +1,21 @@
-import { IQueryRes, querySQL } from '@/apis';
+import {
+    getNotebookConf,
+    IGetNotebookConfRes,
+    IQueryRes,
+    querySQL,
+} from '@/apis';
 import { toReject, toResolve } from '@/utils';
 import dayjs from 'dayjs';
-import { ElMessage } from 'element-plus';
 import { defineStore } from 'pinia';
 import { useSettingStore } from '../Setting/store';
 
 export type { ICalendarState };
 export { useCalendarStore };
 interface ICalendarState {
-    curMonthEventData: IQueryRes[];
+    curMonthData: IQueryRes[];
     curCalValue: Date;
     curDayEventData: IQueryRes[];
-    isShowDrawer: boolean;
-    curDrawerData: IQueryRes | Record<any, any>;
+    loading: boolean;
 }
 
 const structureMap = {
@@ -25,193 +28,150 @@ const structureMap = {
 const useCalendarStore = defineStore('calendar', {
     state(): ICalendarState {
         return {
-            curMonthEventData: [],
+            curMonthData: [],
             curCalValue: new Date(),
             curDayEventData: [],
-            curDrawerData: {},
-            isShowDrawer: false,
+            loading: true,
         };
     },
     getters: {
-        dailyNoteSavePath() {
-            return useSettingStore().dailyNoteSavePath;
+        model() {
+            return useSettingStore().model;
         },
-        pathPrefix() {
-            const dailyNoteSavePath = useSettingStore().dailyNoteSavePath;
-            const prefix = `/${dailyNoteSavePath
-                .split('/')
-                .filter(
-                    (item) =>
-                        !item.includes('{{') &&
-                        !item.includes('}}') &&
-                        item !== '',
-                )
-                .join('/')}`;
-
-            return prefix === '/' ? '' : prefix;
-        },
-        pathStructure() {
-            const dailyNoteSavePath = useSettingStore().dailyNoteSavePath;
-            return dailyNoteSavePath
-                .match(/(?<=\{\{).*?(?=\}\})/g)
-                ?.join('/')
-                .replace(/now \| date/g, '')
-                .replace(/\s/g, '')
-                .replace(/\"/g, '');
-        },
-        curNotebookId() {
-            return useSettingStore().curNotebookId;
+        curNotebookIdList() {
+            return useSettingStore().curNotebookIdList;
         },
     },
     actions: {
         initStore: async function () {
-            const [error] = await this.setMonthEventData();
+            this.loading = true;
+            const [error] = await this.setMonthData();
             if (error) return toReject(error);
-
+            this.loading = false;
             return toResolve(true);
         },
+
+        setMonthData() {
+            if (this.model === 'Todo') {
+                return this.setMonthEventData();
+            } else {
+                return this.setMonthDailyNotes();
+            }
+        },
+
         setMonthEventData: async function (date?: Date) {
-            let hpathWhere = '';
-            const year = dayjs(date || this.curCalValue).format('YYYY');
-            const month = dayjs(date || this.curCalValue).format('MM');
-            if (this.dailyNoteSavePath === '') {
-                ElMessage.error({
-                    message: '请先设置笔记本的日记存放路径！',
-                    grouping: true,
-                });
-                return toReject(new Error('请先设置笔记本的日记存放路径！'));
-            }
+            const day = dayjs(date || this.curCalValue).format('YYYYMM');
 
-            console.log('dailyNoteSavePath::', this.dailyNoteSavePath);
-            console.log('pathPrefix::', this.pathPrefix);
-
-            switch (true) {
-                case this.pathStructure === '' ||
-                    this.pathStructure === undefined:
-                    ElMessage.error({
-                        message: '不支持此路径格式！',
-                        grouping: true,
-                    });
-                    return toReject(new Error('不支持此路径格式！'));
-                case structureMap['/YYYY/YYYY-MM-DD'] === this.pathStructure:
-                    hpathWhere = `${this.pathPrefix}/${year}/${year}-${month}-%`;
-                    break;
-                case structureMap['/YYYY/MM/YYYY-MM-DD'] === this.pathStructure:
-                    hpathWhere = `${this.pathPrefix}/${year}/${month}/%`;
-                    break;
-                case structureMap['/YYYY/MM-DD'] === this.pathStructure:
-                    hpathWhere = `${this.pathPrefix}/${year}/${month}-%`;
-                    break;
-                case structureMap['/YYYY/MM/DD'] === this.pathStructure:
-                    hpathWhere = `${this.pathPrefix}/${year}/${month}/%`;
-                    break;
-            }
-            // -- beginsql
-            console.log(`
-            SELECT
-                *
-            FROM
-                blocks
-            WHERE
-                hpath LIKE '${hpathWhere}'
-                and type = 'l'
-                and subtype = 't'
-                and box = '${this.curNotebookId}'
-            order by
-                    created
-            `);
-
-            const [qError, qRes] = await querySQL(`
-            SELECT
-                *
-            FROM
-                blocks
-            WHERE
-                hpath LIKE '${hpathWhere}'
-                and type = 'l'
-                and subtype = 't'
-                and box = '${this.curNotebookId}'
-            order by
-                    created
-            `);
-            //-- endsql
-            if (qError) return toReject(qError);
-
-            this.curMonthEventData = qRes.data;
-
-            this.curDayEventData = this.curMonthEventData.filter(
-                (item) =>
-                    dayjs(item.created).format('YYYYMMDD') ===
-                    dayjs(this.curCalValue).format('YYYYMMDD'),
+            const notebookIdWhereList = this.curNotebookIdList.map(
+                (item) => `OR box = '${item}'`,
             );
 
+            // -- beginsql
+            const sql = `
+            SELECT
+                *
+            FROM
+                blocks
+            WHERE
+                type = 'l'
+                AND subtype = 't'
+                AND created LIKE '${day}%'
+                AND (${notebookIdWhereList.join(' ').substr(2)})
+            ORDER BY
+                    created`;
+            //-- endsql
+            console.log('setMonthEventData:[sql]:', sql);
+            const [error, res] = await querySQL(sql);
+            if (error) return toReject(error);
+
+            this.curMonthData = res.data;
+
             return toResolve(true);
         },
-        getDayNoteData: async function (date: Date) {
+        setMonthDailyNotes: async function (date?: Date) {
+            const day = dayjs(date || this.curCalValue);
+            const year = day.format('YYYY');
+            const month = day.format('MM');
             let hpathWhere = '';
-            const year = dayjs(date).format('YYYY');
-            const month = dayjs(date).format('MM');
-            const day = dayjs(date).format('DD');
-            if (this.dailyNoteSavePath === '') {
-                ElMessage.error({
-                    message: '请先设置笔记本的日记存放路径！',
-                    grouping: true,
-                });
-                return toReject(new Error('请先设置笔记本的日记存放路径！'));
-            }
 
-            switch (true) {
-                case this.pathStructure === '' ||
-                    this.pathStructure === undefined:
-                    ElMessage.error({
-                        message: '不支持此路径格式！',
-                        grouping: true,
-                    });
-                    return toReject(new Error('不支持此路径格式！'));
-                case structureMap['/YYYY/YYYY-MM-DD'] === this.pathStructure:
-                    hpathWhere = `${this.pathPrefix}/${year}/${year}-${month}-${day}`;
-                    break;
-                case structureMap['/YYYY/MM/YYYY-MM-DD'] === this.pathStructure:
-                    hpathWhere = `${this.pathPrefix}/${year}/${month}/${year}-${month}-${day}%`;
-                    break;
-                case structureMap['/YYYY/MM-DD'] === this.pathStructure:
-                    hpathWhere = `${this.pathPrefix}/${year}/${month}-${day}`;
-                    break;
-                case structureMap['/YYYY/MM/DD'] === this.pathStructure:
-                    hpathWhere = `${this.pathPrefix}/${year}/${month}/${day}`;
-                    break;
+            const notebookConfList: IGetNotebookConfRes[] = [];
+            for (const id of this.curNotebookIdList) {
+                const [error, res] = await getNotebookConf(id);
+                if (error) continue;
+                notebookConfList.push(res.data);
             }
+            const dailyNoteSavePathList = notebookConfList.map((item) => ({
+                dailyNoteSavePath: item.conf.dailyNoteSavePath,
+                notebookId: item.box,
+            }));
 
+            for (const {
+                dailyNoteSavePath,
+                notebookId,
+            } of dailyNoteSavePathList) {
+                const pathPrefix = matchDailyNotePathPrefix(dailyNoteSavePath);
+                const pathStructure =
+                    matchDailyNotePathStructure(dailyNoteSavePath);
+                let hpath = '';
+                switch (true) {
+                    case pathStructure === '' || pathStructure === undefined:
+                        continue;
+                    case structureMap['/YYYY/YYYY-MM-DD'] === pathStructure:
+                        hpath = `${pathPrefix}/${year}/${year}-${month}-__`;
+                        break;
+                    case structureMap['/YYYY/MM/YYYY-MM-DD'] === pathStructure:
+                        hpath = `${pathPrefix}/${year}/${month}/__`;
+                        break;
+                    case structureMap['/YYYY/MM-DD'] === pathStructure:
+                        hpath = `${pathPrefix}/${year}/${month}-__`;
+                        break;
+                    case structureMap['/YYYY/MM/DD'] === pathStructure:
+                        hpath = `${pathPrefix}/${year}/${month}/__`;
+                        break;
+                }
+
+                hpathWhere += `OR (hpath LIKE '${hpath}' AND type = 'd' AND box = '${notebookId}')`;
+            }
             // -- beginsql
-            console.log(`
-            SELECT
-                *
-            FROM
-                blocks
-            WHERE
-                hpath = '${hpathWhere}'
-                and type = 'd'
-                and box = '${this.curNotebookId}'
-            order by
-                    created
-            `);
+            const sql = `
+                SELECT
+                    *
+                FROM
+                     blocks
+                WHERE
+                   ${hpathWhere.substr(2)}
+                ORDER BY
+                        created
+                `;
+            // -- endsql
+            console.log('setMonthDailyNotes:[sql]:', sql);
+            const [error, res] = await querySQL(sql);
 
-            const [qError, qRes] = await querySQL(`
-            SELECT
-                *
-            FROM
-                blocks
-            WHERE
-                hpath = '${hpathWhere}'
-                and type = 'd'
-                and box = '${this.curNotebookId}'
-            order by
-                    created
-            `);
-            //-- endsql
-            if (qError) return toReject(qError);
+            if (error) return toReject(error);
 
-            return toResolve(qRes.data);
+            this.curMonthData = res.data;
+
+            console.log('curMonthData::', this.curMonthData);
+            return toResolve(true);
         },
     },
 });
+
+function matchDailyNotePathPrefix(path: string) {
+    const prefix = `/${path
+        .split('/')
+        .filter(
+            (item) =>
+                !item.includes('{{') && !item.includes('}}') && item !== '',
+        )
+        .join('/')}`;
+    return prefix === '/' ? '' : prefix;
+}
+function matchDailyNotePathStructure(path: string): string | undefined {
+    return path
+        .match(/(?<=\{\{).*?(?=\}\})/g)
+        ?.join('/')
+        .replace(/now \| date/g, '')
+        .replace(/\s/g, '')
+        .replace(/\"/g, '');
+}

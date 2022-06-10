@@ -1,24 +1,45 @@
 <script setup lang="ts">
-import { ElMessage } from 'element-plus';
 import { storeToRefs } from 'pinia';
 import { useSettingStore } from './store';
 
 const settingStore = useSettingStore();
 
-const { curNotebookId, openedNotebooks, curNotebookName } =
+const { curNotebookIdList, openedNotebooks, model, loading } =
     storeToRefs(settingStore);
 
-async function onSwitchNotebook(notebookId: string) {
-    const [error] = await settingStore.switchNotebook(notebookId);
-    if (error) return error;
+async function onSwitchNotebook(notebookIdList: string[]) {
+    loading.value = true;
+    if (notebookIdList.length === 0) {
+        curNotebookIdList.value = openedNotebooks.value.map((item) => item.id);
+        loading.value = false;
+        return ElMessage.error(`请选择笔记本！`);
+    }
+    const [error] = await settingStore.switchNotebook(notebookIdList);
+    if (error) return (loading.value = false);
 
-    ElMessage.success(`切换笔记本为：${curNotebookName.value}`);
+    const notebookNameList = openedNotebooks.value
+        .map((item) => (notebookIdList.includes(item.id) ? item.name : ''))
+        .filter((item) => item !== '');
+
+    loading.value = false;
+    ElMessage.success(`切换笔记本为：${notebookNameList.join(' , ')}`);
+}
+
+function onChangeModel(val: 'Todo' | 'DailyNote') {
+    model.value = val;
+    ElMessage.success(`切换为显示 ${val === 'Todo' ? '事项' : '每日笔记'}`);
 }
 </script>
 <template>
-    <el-form label-position="top">
-        <el-form-item label="当前笔记本">
-            <el-select v-model="curNotebookId" @change="onSwitchNotebook">
+    <el-form v-loading="loading" label-position="top">
+        <el-form-item label="笔记本">
+            <el-select
+                v-model="curNotebookIdList"
+                multiple
+                collapse-tags
+                collapse-tags-tooltip
+                @change="onSwitchNotebook"
+            >
                 <el-option
                     v-for="item in openedNotebooks"
                     :key="item.id"
@@ -26,6 +47,18 @@ async function onSwitchNotebook(notebookId: string) {
                     :value="item.id"
                 />
             </el-select>
+        </el-form-item>
+        <el-form-item label="模式">
+            <el-switch
+                v-model="model"
+                active-color="#13ce66"
+                inactive-color="#409eff"
+                active-value="Todo"
+                inactive-value="DailyNote"
+                active-text="事项"
+                inactive-text="每日笔记"
+                @change="onChangeModel"
+            />
         </el-form-item>
     </el-form>
 </template>

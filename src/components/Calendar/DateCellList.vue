@@ -4,29 +4,33 @@ import { storeToRefs } from 'pinia';
 import { useCalendarStore } from './store';
 
 const props = defineProps<{
-    dayEventData: IQueryRes[] | [];
+    dayData: IQueryRes[] | [];
 }>();
 const calendarStore = useCalendarStore();
-let { isShowDrawer, curDrawerData } = storeToRefs(calendarStore);
-const eventCount = computed(() => props.dayEventData.length);
+let { model } = storeToRefs(calendarStore);
+const itemCount = computed(() => props.dayData.length);
 
 function onClickEventItem(e: Event, item: IQueryRes) {
-    e.stopPropagation();
-    isShowDrawer.value = !isShowDrawer.value;
-    curDrawerData.value = item;
+    // e.stopPropagation();
+}
+
+function retItemBgColor(item: IQueryRes) {
+    if (model.value === 'Todo') {
+        return item.markdown.startsWith('* [X]') ? '#67C23A' : '#F56C6C';
+    } else {
+        return '#409eff';
+    }
 }
 </script>
 <template>
-    <div v-if="eventCount > 0" class="event-list-container">
-        <ul class="event-list">
+    <div v-if="itemCount > 0" class="date-cell-list-container">
+        <ul class="date-cell-list">
             <li
-                v-for="item in dayEventData"
+                v-for="item in dayData"
                 :key="item.id"
-                class="event-list-item"
+                class="date-cell-list-item"
                 :style="{
-                    backgroundColor: item.markdown.startsWith('* [X]')
-                        ? '#67C23A'
-                        : '#F56C6C',
+                    backgroundColor: retItemBgColor(item),
                 }"
                 @click="onClickEventItem($event, item)"
             >
@@ -37,15 +41,15 @@ function onClickEventItem(e: Event, item: IQueryRes) {
 </template>
 
 <style scoped>
-.event-list-container {
+.date-cell-list-container {
     font-size: 12px;
     height: auto;
 }
-.event-list {
+.date-cell-list {
     padding: 0;
 }
-.event-list-item,
-.event-title {
+.date-cell-list-item,
+.date-cell-list-title {
     overflow-x: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -53,9 +57,5 @@ function onClickEventItem(e: Event, item: IQueryRes) {
     padding: 8px;
     border-radius: 3px;
     border: 1px solid #fff;
-}
-
-.event-info {
-    padding: 5px 0px;
 }
 </style>
