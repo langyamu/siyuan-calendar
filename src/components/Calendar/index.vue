@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { isDev } from '@/utils';
 import dayjs from 'dayjs';
 import { storeToRefs } from 'pinia';
 import { useCalendarStore } from './store';
@@ -14,8 +13,6 @@ const { curCalValue, curMonthEventData, curDrawerData, isShowDrawer } =
 const calendarRef = ref();
 
 await calendarStore.initStore();
-
-const windowOrigin = isDev() ? 'http://127.0.0.1:6806' : window.location.origin;
 
 const selectDate = (val: string) => {
     calendarRef.value.selectDate(val);
@@ -79,6 +76,10 @@ const selectDate = (val: string) => {
             <el-link
                 type="primary"
                 :href="`siyuan://blocks/${curDrawerData.id}`"
+                :underline="false"
+            >
+                <el-icon style="top: 1px; margin-right: 3px"
+                    ><i-ep-link /></el-icon
                 >跳转至笔记</el-link
             >
         </div>

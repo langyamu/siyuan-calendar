@@ -2,6 +2,7 @@
 import { IQueryRes } from '@/apis';
 import { toReject } from '@/utils';
 import dayjs from 'dayjs';
+import { ElMessage } from 'element-plus';
 import { storeToRefs } from 'pinia';
 import EventList from './EventList.vue';
 import { useCalendarStore } from './store';
@@ -33,7 +34,7 @@ async function onClickDateCell() {
 
     if (error) return toReject(error);
     if (dayNoteData.length < 1) {
-        return;
+        return ElMessage.success('没有笔记与事项');
     }
     curDrawerData.value = dayNoteData[0];
     console.log(curDrawerData);
@@ -42,8 +43,11 @@ async function onClickDateCell() {
 </script>
 
 <template>
-    <el-scrollbar height="var(--el-calendar-cell-width)">
-        <div class="date-cell-container" @click="onClickDateCell">
+    <el-scrollbar
+        height="var(--el-calendar-cell-width)"
+        @click="onClickDateCell"
+    >
+        <div class="date-cell-container">
             <div
                 :class="{
                     'date-cell-header-selected': isSelected,
