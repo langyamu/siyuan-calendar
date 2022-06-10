@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import base from './routes/base';
-export { setupRouter };
+export { initRouter };
 const router = createRouter({
     routes: [...base],
     history: createWebHistory(),
 });
 
-function setupRouter(app: any) {
+function initRouter(app: any) {
     app.use(router);
 }
 

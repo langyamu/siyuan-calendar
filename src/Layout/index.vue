@@ -28,13 +28,7 @@ const isCollapse = ref(false);
         </el-aside>
         <el-container>
             <el-main>
-                <router-view v-slot="{ Component, route }">
-                    <transition name="fade-slide" mode="out-in" appear>
-                        <keep-alive>
-                            <component :is="Component" :key="route.fullPath" />
-                        </keep-alive>
-                    </transition>
-                </router-view>
+                <router-view> </router-view>
             </el-main>
         </el-container>
     </el-container>

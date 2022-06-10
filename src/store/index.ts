@@ -1,10 +1,10 @@
 import { createPinia } from 'pinia';
 
-export { setupStore };
+export { initStore };
 
 const store = createPinia();
 
-function setupStore(app: any) {
+function initStore(app: any) {
     app.use(store);
 }
 export default store;

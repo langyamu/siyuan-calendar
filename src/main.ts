@@ -1,15 +1,18 @@
 import App from '@/App.vue';
-import { setupRouter } from '@/router';
-import { setupStore } from '@/store';
+import { initRouter } from '@/router';
+import { initStore } from '@/store';
 import 'element-plus/es/components/message/style/css';
 import { createApp } from 'vue';
+import { initSettingStore } from './components/Setting/store';
 
-function bootstrap() {
+async function bootstrap() {
     const app = createApp(App);
 
-    setupRouter(app);
+    initRouter(app);
 
-    setupStore(app);
+    initStore(app);
+
+    await initSettingStore();
 
     app.mount('#app');
 }

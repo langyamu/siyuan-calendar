@@ -1,32 +1,18 @@
 <script setup lang="ts">
-import { INotebook, lsNotebooks } from '@/apis';
+import { ElMessage } from 'element-plus';
 import { storeToRefs } from 'pinia';
-import { Ref } from 'vue';
-import useSettingStore from './store';
+import { useSettingStore } from './store';
 
-const { curNotebookId } = storeToRefs(useSettingStore());
+const settingStore = useSettingStore();
 
-let openedNotebooks: Ref<Array<INotebook> | []> = ref([]);
+const { curNotebookId, openedNotebooks, curNotebookName } =
+    storeToRefs(settingStore);
 
-const [error, res] = await lsNotebooks();
+async function onSwitchNotebook(notebookId: string) {
+    const [error] = await settingStore.switchNotebook(notebookId);
+    if (error) return error;
 
-if (!error) {
-    const notebooks = res.data.notebooks;
-    // item.closed === true (关闭) or false (打开)
-    openedNotebooks.value = notebooks.filter(
-        (item) => !item.closed && item.name !== '思源笔记用户指南',
-    );
-    curNotebookId.value = openedNotebooks.value[0].id;
-}
-
-function onSwitchNotebook(notebookId: string) {
-    if (notebookId !== '') {
-        const notebookName = openedNotebooks.value.filter(
-            (item) => item.id === notebookId,
-        )[0].name;
-
-        ElMessage.success(`切换笔记本为：${notebookName}`);
-    }
+    ElMessage.success(`切换笔记本为：${curNotebookName.value}`);
 }
 </script>
 <template>
