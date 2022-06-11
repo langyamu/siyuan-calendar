@@ -41,6 +41,9 @@ const useCalendarStore = defineStore('calendar', {
         curNotebookIdList() {
             return useSettingStore().curNotebookIdList;
         },
+        limit() {
+            return useSettingStore().limit;
+        },
     },
     actions: {
         initStore: async function () {
@@ -62,9 +65,10 @@ const useCalendarStore = defineStore('calendar', {
         setMonthEventData: async function (date?: Date) {
             const day = dayjs(date || this.curCalValue).format('YYYYMM');
 
-            const notebookIdWhereList = this.curNotebookIdList.map(
-                (item) => `OR box = '${item}'`,
-            );
+            const notebookIdWhere = this.curNotebookIdList
+                .map((item) => `OR box = '${item}'`)
+                .join(' ')
+                .substr(2);
 
             // -- beginsql
             const sql = `
@@ -76,9 +80,13 @@ const useCalendarStore = defineStore('calendar', {
                 type = 'l'
                 AND subtype = 't'
                 AND created LIKE '${day}%'
-                AND (${notebookIdWhereList.join(' ').substr(2)})
+                AND parent_id = root_id
+                AND ( ${notebookIdWhere} )
             ORDER BY
-                    created`;
+                created DESC
+            LIMIT
+                ${this.limit}
+            `;
             //-- endsql
             console.log('setMonthEventData:[sql]:', sql);
             const [error, res] = await querySQL(sql);
@@ -142,6 +150,8 @@ const useCalendarStore = defineStore('calendar', {
                    ${hpathWhere.substr(2)}
                 ORDER BY
                         created
+                LIMIT
+                    ${this.limit}
                 `;
             // -- endsql
             console.log('setMonthDailyNotes:[sql]:', sql);

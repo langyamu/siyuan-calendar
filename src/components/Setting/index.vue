@@ -4,7 +4,7 @@ import { useSettingStore } from './store';
 
 const settingStore = useSettingStore();
 
-const { curNotebookIdList, openedNotebooks, model, loading } =
+const { curNotebookIdList, openedNotebooks, model, loading, limit } =
     storeToRefs(settingStore);
 
 async function onSwitchNotebook(notebookIdList: string[]) {
@@ -32,6 +32,18 @@ function onChangeModel(val: 'Todo' | 'DailyNote') {
 </script>
 <template>
     <el-form v-loading="loading" label-position="top">
+        <el-form-item label="显示模式">
+            <el-switch
+                v-model="model"
+                active-color="#13ce66"
+                inactive-color="#409eff"
+                active-value="Todo"
+                inactive-value="DailyNote"
+                active-text="事项"
+                inactive-text="每日笔记"
+                @change="onChangeModel"
+            />
+        </el-form-item>
         <el-form-item label="笔记本">
             <el-select
                 v-model="curNotebookIdList"
@@ -48,17 +60,8 @@ function onChangeModel(val: 'Todo' | 'DailyNote') {
                 />
             </el-select>
         </el-form-item>
-        <el-form-item label="模式">
-            <el-switch
-                v-model="model"
-                active-color="#13ce66"
-                inactive-color="#409eff"
-                active-value="Todo"
-                inactive-value="DailyNote"
-                active-text="事项"
-                inactive-text="每日笔记"
-                @change="onChangeModel"
-            />
+        <el-form-item label="最大显示数量">
+            <el-input-number v-model="limit" :min="1" />
         </el-form-item>
     </el-form>
 </template>

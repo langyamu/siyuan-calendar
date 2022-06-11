@@ -12,6 +12,7 @@ const itemCount = computed(() => props.dayData.length);
 
 function onClickEventItem(e: Event, item: IQueryRes) {
     // e.stopPropagation();
+    window.location.href = `siyuan://blocks/${item.id}`;
 }
 
 function retItemBgColor(item: IQueryRes) {

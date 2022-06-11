@@ -10,6 +10,7 @@ interface ISettingState {
     curNotebookIdList: string[];
     openedNotebooks: Array<INotebook> | [];
     loading: boolean;
+    limit: number;
 }
 
 const useSettingStore = defineStore('setting', {
@@ -19,6 +20,7 @@ const useSettingStore = defineStore('setting', {
             curNotebookIdList: [],
             openedNotebooks: [],
             loading: true,
+            limit: 50,
         };
     },
     getters: {},

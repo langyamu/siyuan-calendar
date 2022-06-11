@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Drawer from '@/components/Calendar/Drawer/index.vue';
 import Calendar from '@/components/Calendar/index.vue';
 </script>
 
@@ -6,6 +7,7 @@ import Calendar from '@/components/Calendar/index.vue';
     <el-container direction="vertical">
         <el-main>
             <Calendar />
+            <Drawer />
         </el-main>
     </el-container>
 </template>

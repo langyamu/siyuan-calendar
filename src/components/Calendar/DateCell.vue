@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import dayjs from 'dayjs';
+import { ElMessage } from 'element-plus';
 import { storeToRefs } from 'pinia';
+import { useDrawerStore } from './Drawer/store';
 import { useCalendarStore } from './store';
 
 const props = defineProps<{
@@ -19,24 +21,24 @@ const dayData = computed(() =>
     ),
 );
 
-async function onClickDateCell() {
-    // let { isShowDrawer, curDrawerData } = storeToRefs(calendarStore);
-    // const rootId = dayEventData.value[0].root_id;
-    // console.log(dayEventData.value);
-    // const [error, dayNoteData] = await calendarStore.getDayNoteData(props.date);
-    // if (error) return toReject(error);
-    // if (dayNoteData.length < 1) {
-    //     return ElMessage.success('没有笔记与事项');
-    // }
-    // curDrawerData.value = dayNoteData[0];
-    // console.log(curDrawerData);
-    // isShowDrawer.value = !isShowDrawer.value;
+async function onClickDateCell(e: Event) {
+    console.log('dayData:', dayData);
+    e.stopPropagation();
+    if (dayData.value.length < 1) return ElMessage.success('没有笔记与事项');
+
+    const { isShow, curData, title } = storeToRefs(useDrawerStore());
+
+    isShow.value = !isShow.value;
+
+    title.value = dayjs(props.date).format('YYYY-MM-DD');
+
+    curData.value = dayData.value;
 }
 </script>
 
 <template>
     <el-scrollbar height="var(--el-calendar-cell-width)">
-        <div class="date-cell-container" @click="onClickDateCell">
+        <div class="date-cell-container" @click="onClickDateCell($event)">
             <div
                 :class="{
                     'date-cell-header-selected': isSelected,
