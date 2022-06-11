@@ -11,7 +11,7 @@ import zhCn from 'element-plus/lib/locale/lang/zh-cn';
     </suspense>
 </template>
 
-<style scoped>
+<style>
 html,
 body,
 #app {
@@ -19,5 +19,6 @@ body,
     height: 100%;
     margin: 0;
     padding: 0;
+    background-color: #fff;
 }
 </style>

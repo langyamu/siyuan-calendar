@@ -15,7 +15,7 @@ interface ISettingState {
 const useSettingStore = defineStore('setting', {
     state(): ISettingState {
         return {
-            model: 'Todo',
+            model: 'DailyNote',
             curNotebookIdList: [],
             openedNotebooks: [],
             loading: true,
