@@ -37,8 +37,11 @@ async function onClickDateCell(e: Event) {
 </script>
 
 <template>
-    <el-scrollbar height="var(--el-calendar-cell-width)">
-        <div class="date-cell-container" @click="onClickDateCell($event)">
+    <el-scrollbar
+        height="var(--el-calendar-cell-width)"
+        @click="onClickDateCell($event)"
+    >
+        <div class="date-cell-container">
             <div
                 :class="{
                     'date-cell-header-selected': isSelected,

@@ -1,4 +1,5 @@
 import { IQueryRes } from '@/apis';
+import { useSettingStore } from '@/components/Setting/store';
 import { defineStore } from 'pinia';
 export { useDrawerStore };
 
@@ -15,5 +16,10 @@ const useDrawerStore = defineStore('drawerStore', {
             curData: [],
             title: '',
         };
+    },
+    getters: {
+        model() {
+            return useSettingStore().model;
+        },
     },
 });
